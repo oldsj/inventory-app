@@ -1,0 +1,7 @@
+version: '3'
+services:
+  flask:
+    build: ../app/
+    image: myimage
+    ports:
+      - "80:80"

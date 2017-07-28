@@ -3,7 +3,7 @@ services:
   flask:
     image: myimage
     ports:
-      - "5009:5009"
+      - "5009:80"
     volumes:
       - './app:/app'
     command: ["python3", "main.py"]
