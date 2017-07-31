@@ -3,7 +3,11 @@ app = Flask(__name__)
 
 @app.route("/")
 def hello():
-    return "Hello World from testest"
+    return "Hello World from est"
 
+@app.route("/inventory/<inventoryid>")
+def inventory(inventoryid):
+    return "You requested " + inventoryid
+ 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+    app.run(host='0.0.0.0', debug=True, port=8080)
