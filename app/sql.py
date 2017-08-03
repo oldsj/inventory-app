@@ -1,40 +1,38 @@
-import sqlalchemy
-import os
+from sqlalchemy import create_engine  
+from sqlalchemy import Column, String  
+from sqlalchemy.ext.declarative import declarative_base  
+from sqlalchemy.orm import sessionmaker
+from os import environ
 
-def connect(user, password, db, host='db', port=5432):
-    '''Returns a connection and a metadata object'''
-    # We connect with the help of the PostgreSQL URL
-    # postgresql://federer:grandestslam@localhost:5432/tennis
-    url = 'postgresql://{}:{}@{}:{}/{}'
-    url = url.format(user, password, host, port, db)
+db_user = "inventory-app"
+db_password = environ["POSTGRES_PASSWORD"]
+db_string = "postgres://" + db_user + ":" + db_password + "@db/"
 
-    # The return value of create_engine() is our connection object
-    con = sqlalchemy.create_engine(url, client_encoding='utf8')
+db = create_engine(db_string)  
+base = declarative_base()
 
-    # We then bind the connection to MetaData()
-    meta = sqlalchemy.MetaData(bind=con, reflect=True)
+class Ingredient(base):  
+    __tablename__ = 'ingredients'
 
-    return con, meta
+    barcode = Column(String, primary_key=True)
+    name = Column(String)
 
-con, meta = connect(os.environ['POSTGRES_USER'],
-    os.environ['POSTGRES_PASSWORD'], os.environ['POSTGRES_USER'])
+Session = sessionmaker(db)  
+session = Session()
 
-print(con)
+base.metadata.create_all(db)
 
-print(meta)
+# Create 
+ground_beef = Ingredient(barcode="9685310001", name="Ground Beef")  
+session.add(ground_beef)  
+session.commit()
 
-from sqlalchemy import Table, Column, Integer, String, ForeignKey
+# Read
+ingredients = session.query(Ingredient)  
+for i in ingredients:  
+    print(i.name)
 
-slams = Table('slams', meta,
-    Column('name', String, primary_key=True),
-    Column('country', String)
-)
 
-results = Table('results', meta,
-    Column('slam', String, ForeignKey('slams.name')),
-    Column('year', Integer),
-    Column('result', String)
-)
-
-# Create the above tables
-meta.create_all(con)
+# Delete
+session.delete(ground_beef)  
+session.commit() 
